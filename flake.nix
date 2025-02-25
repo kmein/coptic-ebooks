@@ -87,14 +87,14 @@
           files=$(ls -1 *.typ | ${pkgs.jq}/bin/jq -R . | ${pkgs.jq}/bin/jq -s .)
 
           cat <<EOF > scriptorium.typ
-          #set text(font: "IFAO-Grec Unicode")
+          #set text(font: ("Noto Sans Coptic", "Noto Sans"))
           #set par(justify: true)
           #for chapter in json.decode(sys.inputs.files) {
             include chapter
           }
           EOF
 
-          ${pkgs.typst}/bin/typst compile --font-path=${ifao-grec} --input="files=$files" scriptorium.typ $out
+          ${pkgs.typst}/bin/typst compile --font-path=${ifao-grec}:${pkgs.noto-fonts}/share/fonts/noto --input="files=$files" scriptorium.typ $out
         '';
 
 
