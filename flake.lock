@@ -1,0 +1,44 @@
+{
+  "nodes": {
+    "copticscriptorium": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1732145659,
+        "narHash": "sha256-JIrZXW6mzZU7VT9pSieVLT11L8vjXJ2tAf3HYiG3dm0=",
+        "owner": "copticscriptorium",
+        "repo": "corpora",
+        "rev": "89cf7d777902dd476211049a9a0f7d93970b892d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "copticscriptorium",
+        "repo": "corpora",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1740367490,
+        "narHash": "sha256-WGaHVAjcrv+Cun7zPlI41SerRtfknGQap281+AakSAw=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "0196c0175e9191c474c26ab5548db27ef5d34b05",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "copticscriptorium": "copticscriptorium",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
