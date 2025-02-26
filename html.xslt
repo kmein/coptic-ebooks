@@ -15,7 +15,9 @@
           <xsl:apply-templates select="//tei:titleStmt/tei:title" />
         </h1>
         <table>
-          <xsl:apply-templates select="//tei:body" />
+          <tbody>
+            <xsl:apply-templates select="//tei:body" />
+          </tbody>
         </table>
       </body>
     </html>
