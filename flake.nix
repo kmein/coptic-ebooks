@@ -67,7 +67,7 @@
           done
 
           ${pkgs.pandoc}/bin/pandoc $dir_out/*.html \
-            -o $out \
+            -t epub2 -o $out \
             --css ${pkgs.writeText "style.css" css} \
             --epub-embed-font=${ifao-grec}/IFAOGrec.ttf \
             --epub-embed-font=${pkgs.eb-garamond}/share/fonts/opentype/EBGaramond08-Regular.otf \
