@@ -3,11 +3,11 @@
     "copticscriptorium": {
       "flake": false,
       "locked": {
-        "lastModified": 1732145659,
-        "narHash": "sha256-JIrZXW6mzZU7VT9pSieVLT11L8vjXJ2tAf3HYiG3dm0=",
+        "lastModified": 1751487360,
+        "narHash": "sha256-fp/BSpfsFuNdKbLZDFLCbYc13REQJca9ik2IaJHN7kM=",
         "owner": "copticscriptorium",
         "repo": "corpora",
-        "rev": "89cf7d777902dd476211049a9a0f7d93970b892d",
+        "rev": "4b73601a7e5d536fe60dc4ea80567dc4d6f22372",
         "type": "github"
       },
       "original": {
@@ -18,11 +18,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1740367490,
-        "narHash": "sha256-WGaHVAjcrv+Cun7zPlI41SerRtfknGQap281+AakSAw=",
+        "lastModified": 1758277210,
+        "narHash": "sha256-iCGWf/LTy+aY0zFu8q12lK8KuZp7yvdhStehhyX1v8w=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "0196c0175e9191c474c26ab5548db27ef5d34b05",
+        "rev": "8eaee110344796db060382e15d3af0a9fc396e0e",
         "type": "github"
       },
       "original": {
