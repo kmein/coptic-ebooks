@@ -59,63 +59,36 @@ h1, h2, h3, h4 {
 
 /* ---------------------------------------------------------- text */
 
-/* One translation unit: Coptic first, English beneath. Keep the pair on one
- * page so the reader never has to turn the page to see the translation. */
-.seg {
-  margin: 0 0 1em;
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-
+/* Coptic runs as continuous prose; nothing English sits between the lines. */
 .cop {
   font-size: 1.12em;
   /* room for supralinear strokes */
   line-height: 1.7;
-  margin: 0;
+  margin: 0 0 0.9em;
   text-align: left;
   overflow-wrap: break-word;
 }
 
-.tr {
-  font-size: 0.92em;
-  line-height: 1.4;
-  margin: 0.15em 0 0;
-  text-align: left;
-  -webkit-hyphens: auto;
-  hyphens: auto;
-  opacity: 0.75;
-}
-
-/* Verse numbers hang in a left gutter of 2.2em (body units). */
-body.num .seg {
-  padding-left: 2.2em;
-}
-
-/* Gutter in .vn units: 2.2em body / 1.12 (.cop) / 0.7 (.vn) = 2.806em. */
-.vn {
-  display: inline-block;
-  width: 2.143em;
-  padding-right: 0.663em;
-  margin-left: -2.806em;
-  text-align: right;
+/* Reference marks: verse numbers (or running counts) in the Coptic, linking
+ * to the translation. Kept small and light so they do not break the flow. */
+.nr, .vn, .vm, .back {
   font-family: "Libertinus Serif", serif;
-  font-size: 0.7em;
-  line-height: 1;
-}
-
-.vn, .vm {
   color: #9c2f1f;
+  text-decoration: none;
   -webkit-font-feature-settings: "lnum";
   font-feature-settings: "lnum";
 }
 
-/* verse starting mid-sentence */
-.vm {
-  font-family: "Libertinus Serif", serif;
-  font-size: 0.62em;
+.nr, .vn, .vm {
+  font-size: 0.6em;
   vertical-align: super;
   line-height: 0;
-  margin-right: 0.15em;
+  /* larger tap target without widening the gap */
+  padding: 0 0.25em 0 0.1em;
+}
+
+.vn, .vm {
+  opacity: 0.6;
 }
 
 /* manuscript rubrication and enlarged initials */
@@ -140,23 +113,37 @@ body.num .seg {
   line-height: 0;
 }
 
-/* Wide screens: facing columns, like a Loeb edition. */
-@media (min-width: 46em) {
-  @supports (display: grid) {
-    .seg {
-      display: grid;
-      grid-template-columns: 1.1fr 1fr;
-      column-gap: 1.8em;
-      align-items: baseline;
-    }
-    .cop {
-      grid-column: 1;
-    }
-    .tr {
-      grid-column: 2;
-      margin: 0;
-    }
-  }
+/* The chapter's translation, after its Coptic, on a page of its own. */
+.notes {
+  page-break-before: always;
+  break-before: page;
+}
+
+.notes-head {
+  font-size: 1em;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  margin: 1em 0 1.2em;
+}
+
+.tn p {
+  margin: 0 0 0.45em;
+  text-align: left;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
+.back {
+  font-size: 0.75em;
+  margin-right: 0.3em;
+}
+
+.notes .sec {
+  margin: 1.2em 0 0.5em;
+}
+
+.notes .sec a {
+  text-decoration: none;
 }
 
 /* ---------------------------------------------------------- front/back */
@@ -282,7 +269,7 @@ body.num .seg {
 }
 
 @media (prefers-color-scheme: dark) {
-  .vn, .vm, .rb, .incipit {
+  .nr, .vn, .vm, .back, .rb, .incipit {
     color: #e08a70;
   }
 }

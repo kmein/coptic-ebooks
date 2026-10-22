@@ -101,8 +101,9 @@ class Segment:
 
     translation: str | None
     words: list = field(default_factory=list)
-    label: str | None = None  # verse number shown in the gutter
+    label: str | None = None  # verse number at the start of the unit
     id: str = ""
+    para: bool = False  # source marks a paragraph break before it
 
 
 @dataclass
@@ -202,6 +203,7 @@ def parse_doc(name, text):
     doc = Doc(name, meta, [])
     seg = word = None
     pending_verse = pending_section = None
+    pending_para = False
     rend = []
     n_seg = n_sec = 0
 
@@ -231,6 +233,8 @@ def parse_doc(name, text):
                     pending_section = a.get(n, "").strip()
             elif n == "hi_rend":
                 rend.append(a.get(n, ""))
+            elif n == "p" or (n == "p_n" and verse_tag != "p_n"):
+                pending_para = True
         elif kind == "close":
             if n == "translation":
                 finish()
@@ -250,6 +254,7 @@ def parse_doc(name, text):
                     doc.items.append(Section(pending_section, f"s{n_sec}"))
                     pending_section = None
                 seg.id = f"v{n_seg}"
+                seg.para, pending_para = pending_para, False
                 doc.items.append(seg)
             if word is None:
                 word = Word([])
@@ -467,33 +472,93 @@ def render_words(words):
     return " ".join(out)
 
 
-def render_segment(seg, numbered):
-    parts = [f'<div class="seg" id="{seg.id}">']
-    if seg.words:
-        vn = ""
-        if numbered:
-            vn = f'<span class="vn">{esc(seg.label or "")}</span>'
-        parts.append(f'<p class="cop" {COP}>{vn}{render_words(seg.words)}</p>')
+LONG_PARAGRAPH = 60  # Coptic bound groups, about five lines on a phone
+SENTENCE_END = re.compile(r"[.!?;][\s”’\"')\]]*$")
+COPTIC_STOP = re.compile(r"[.:·\u0387\u2cfe\u2cf9-\u2cfb]$")
+
+
+def ends_sentence(seg):
+    """Whether a paragraph may end after this unit."""
     if seg.translation:
-        parts.append(f'<p class="tr">{esc(seg.translation)}</p>')
-    parts.append("</div>")
-    return "".join(parts)
+        return bool(SENTENCE_END.search(seg.translation))
+    if seg.label:  # untranslated units are verses; normalized text has no punctuation
+        return True
+    return bool(seg.words) and bool(COPTIC_STOP.search(seg.words[-1].parts[-1][0]))
+
+
+def unit_marks(doc, numbered):
+    """Reference mark per segment: its verse number, '12b' for later units of
+    verse 12, or a running count in texts without verse numbers."""
+    marks, last, sub, count = {}, None, 0, 0
+    for seg in doc.items:
+        if not isinstance(seg, Segment):
+            continue
+        count += 1
+        if not numbered:
+            marks[seg.id] = str(count)
+        elif seg.label:
+            last, sub = seg.label, 0
+            marks[seg.id] = seg.label
+        else:
+            sub += 1
+            marks[seg.id] = f"{last or ''}{chr(ord('a') + sub) if sub < 26 else sub + 1}"
+    return marks
 
 
 def render_doc(book, doc, first_in_group):
+    """Coptic as continuous prose; each unit's mark links to its translation
+    (a pop-up note in most readers) and the translation links back.
+
+    The translations follow the Coptic as a section of their own, so the eye
+    is never pulled from the Coptic onto the English."""
     level = 2 if book.grouped else 1
     head = []
     if book.grouped and first_in_group:
         head.append(f'<h1 class="part">{esc(doc.group)}</h1>')
     head.append(f'<h{level} class="doc">{esc(doc.title)}</h{level}>')
-    body = [f'<section epub:type="chapter" role="doc-chapter">', "<header>", *head, "</header>"]
+    body = ['<section epub:type="chapter" role="doc-chapter">', "<header>", *head, "</header>"]
+    marks = unit_marks(doc, book.numbered)
+    para, notes = [], []
+    words = 0  # Coptic words in the open paragraph
+    sentence_end = False  # previous unit's translation closed a sentence
+
+    def flush():
+        nonlocal words
+        if para:
+            body.append(f'<p class="cop" {COP}>{" ".join(para)}</p>')
+            para.clear()
+        words = 0
+
     for item in doc.items:
         if isinstance(item, Section):
+            flush()
             body.append(f'<h{level + 1} class="sec" id="{item.id}">§ {esc(item.label)}</h{level + 1}>')
+            notes.append(f'<p class="sec"><a href="#{item.id}">§ {esc(item.label)}</a></p>')
+            continue
+        # Most sources mark no paragraphs (a Bible chapter would be one block):
+        # break long runs where the translation ends a sentence.
+        if item.para or (words >= LONG_PARAGRAPH and sentence_end):
+            flush()
+        words += len(item.words)
+        sentence_end = ends_sentence(item)
+        mark = esc(marks[item.id])
+        if item.translation:
+            ref = (f'<a class="nr" id="{item.id}" href="#t{item.id}" epub:type="noteref" '
+                   f'role="doc-noteref">{mark}</a>')
+            notes.append(f'<aside class="tn" id="t{item.id}" epub:type="footnote" role="doc-footnote">'
+                         f'<p><a class="back" href="#{item.id}" role="doc-backlink">{mark}</a> '
+                         f'{esc(item.translation)}</p></aside>')
+        elif item.label:
+            ref = f'<span class="vn" id="{item.id}">{mark}</span>'
         else:
-            body.append(render_segment(item, book.numbered))
+            ref = f'<span id="{item.id}"></span>'
+        para.append(ref + render_words(item.words))
+    flush()
     body.append("</section>")
-    return page(doc.title, "\n".join(body), "num" if book.numbered else "")
+    if any(n.startswith("<aside") for n in notes):
+        body += ['<section class="notes" aria-label="Translation">',
+                 f'<h{level + 1} class="notes-head">Translation</h{level + 1}>', *notes, "</section>"]
+    return page(doc.title, "\n".join(body))
 
 
 def render_cover():
@@ -526,9 +591,12 @@ def render_title(book):
     for k, v in credits:
         lines.append(f"<dt>{esc(k)}</dt><dd>{esc(v)}</dd>")
     lines.append("</dl>")
+    if book.coverage:
+        lines.append('<p class="note">Tap a raised number in the Coptic to see its English translation. '
+                     "Each chapter’s translation follows its Coptic text and links back to it.</p>")
     if 0 < book.coverage < 0.9:
         lines.append(f'<p class="note">The source data provides an English translation for about '
-                     f"{round(book.coverage * 100)}% of the text; untranslated passages appear in Coptic only.</p>")
+                     f"{round(book.coverage * 100)}% of the text; untranslated passages carry no link.</p>")
     elif book.coverage == 0:
         lines.append('<p class="note">The source data does not yet provide an English translation '
                      "for this text.</p>")
