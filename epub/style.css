@@ -1,0 +1,288 @@
+/* Bilingual Coptic/English reading edition.
+ * No body font-size or text colour is set, so reader themes, font-size
+ * controls and night modes keep working. build.py prepends the @font-face
+ * rules for the embedded (subsetted) fonts. */
+
+body {
+  font-family: "Libertinus Serif", "DejaVu Sans", serif;
+  line-height: 1.45;
+  margin: 0;
+  padding: 0;
+}
+
+:lang(cop) {
+  font-family: "Noto Sans Coptic", "Libertinus Serif", "DejaVu Sans", sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+/* ---------------------------------------------------------- headings */
+
+h1, h2, h3, h4 {
+  font-weight: normal;
+  text-align: center;
+  -webkit-hyphens: none;
+  hyphens: none;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+.part {
+  font-size: 1.7em;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  margin: 1.5em 0 0.3em;
+}
+
+.doc {
+  font-size: 1.3em;
+  line-height: 1.25;
+  margin: 1.2em 0 1.4em;
+}
+
+.doc::after {
+  content: "";
+  display: block;
+  width: 3em;
+  margin: 0.6em auto 0;
+  border-top: 1px solid currentColor;
+  opacity: 0.4;
+}
+
+.sec {
+  font-size: 0.85em;
+  letter-spacing: 0.06em;
+  margin: 1.8em 0 0.9em;
+}
+
+/* ---------------------------------------------------------- text */
+
+/* One translation unit: Coptic first, English beneath. Keep the pair on one
+ * page so the reader never has to turn the page to see the translation. */
+.seg {
+  margin: 0 0 1em;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.cop {
+  font-size: 1.12em;
+  /* room for supralinear strokes */
+  line-height: 1.7;
+  margin: 0;
+  text-align: left;
+  overflow-wrap: break-word;
+}
+
+.tr {
+  font-size: 0.92em;
+  line-height: 1.4;
+  margin: 0.15em 0 0;
+  text-align: left;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  opacity: 0.75;
+}
+
+/* Verse numbers hang in a left gutter of 2.2em (body units). */
+body.num .seg {
+  padding-left: 2.2em;
+}
+
+/* Gutter in .vn units: 2.2em body / 1.12 (.cop) / 0.7 (.vn) = 2.806em. */
+.vn {
+  display: inline-block;
+  width: 2.143em;
+  padding-right: 0.663em;
+  margin-left: -2.806em;
+  text-align: right;
+  font-family: "Libertinus Serif", serif;
+  font-size: 0.7em;
+  line-height: 1;
+}
+
+.vn, .vm {
+  color: #9c2f1f;
+  -webkit-font-feature-settings: "lnum";
+  font-feature-settings: "lnum";
+}
+
+/* verse starting mid-sentence */
+.vm {
+  font-family: "Libertinus Serif", serif;
+  font-size: 0.62em;
+  vertical-align: super;
+  line-height: 0;
+  margin-right: 0.15em;
+}
+
+/* manuscript rubrication and enlarged initials */
+.rb {
+  color: #9c2f1f;
+}
+
+.big {
+  font-size: 1.25em;
+  line-height: 1;
+}
+
+.sup {
+  font-size: 0.7em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+.sub {
+  font-size: 0.7em;
+  vertical-align: sub;
+  line-height: 0;
+}
+
+/* Wide screens: facing columns, like a Loeb edition. */
+@media (min-width: 46em) {
+  @supports (display: grid) {
+    .seg {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      column-gap: 1.8em;
+      align-items: baseline;
+    }
+    .cop {
+      grid-column: 1;
+    }
+    .tr {
+      grid-column: 2;
+      margin: 0;
+    }
+  }
+}
+
+/* ---------------------------------------------------------- front/back */
+
+.cover {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.cover svg {
+  height: 100%;
+  width: 100%;
+}
+
+.titlepage {
+  text-align: center;
+  padding-top: 12%;
+}
+
+.incipit {
+  font-size: 1.4em;
+  color: #9c2f1f;
+  margin: 0 0 1.6em;
+}
+
+.book-title {
+  font-size: 2em;
+  line-height: 1.2;
+  margin: 0 0 0.4em;
+}
+
+.book-author {
+  font-size: 1.2em;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  margin: 0 0 1.2em;
+}
+
+.book-sub {
+  font-style: italic;
+  margin: 0;
+}
+
+.rule {
+  width: 4em;
+  margin: 2em auto;
+  border: 0;
+  border-top: 1px solid currentColor;
+  opacity: 0.4;
+}
+
+.credits {
+  font-size: 0.85em;
+  margin: 0;
+}
+
+.credits dt {
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+.credits dd {
+  margin: 0 0 0.6em;
+}
+
+.note {
+  font-size: 0.85em;
+  font-style: italic;
+  margin: 2em 1.5em 0;
+}
+
+.back h2 {
+  font-size: 1.05em;
+  text-align: left;
+  margin: 1.6em 0 0.4em;
+}
+
+.back p {
+  font-size: 0.9em;
+}
+
+.sources {
+  font-size: 0.85em;
+  margin: 0;
+}
+
+.sources dt {
+  float: left;
+  clear: left;
+  width: 7.5em;
+  font-variant: small-caps;
+  opacity: 0.7;
+}
+
+.sources dd {
+  margin: 0 0 0.25em 8em;
+}
+
+.urn {
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+
+.toc ol {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.toc ol ol {
+  padding-left: 1.5em;
+  font-size: 0.95em;
+}
+
+.toc li {
+  margin: 0.25em 0;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .vn, .vm, .rb, .incipit {
+    color: #e08a70;
+  }
+}

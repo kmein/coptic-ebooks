@@ -20,58 +20,19 @@
         stripRoot = false;
         hash = "sha256-qWnCCaY/yM0oyGjt/8tV+Sy/rMWRiN413zwgD/GWbpI=";
       };
-      css = ''
-        @font-face {
-          font-family: "Garamond";
-          font-style: normal;
-          font-weight: normal;
-          src: url("${pkgs.eb-garamond}/share/fonts/opentype/EBGaramond08-Regular.otf");
-        }
-
-        @font-face {
-          font-family: "IFAO Grec";
-          font-style: normal;
-          font-weight: normal;
-          src: url("${ifao-grec}/IFAOGrec.ttf");
-        }
-
-        body {
-          font-family: "IFAO Grec", "Garamond", serif;
-        }
-
-        .coptic {
-          width: 66%;
-        }
-
-        h1 {
-          display: none
-        }
-
-        .translation {
-          font-family: "Garamond";
-          font-size: 0.7em;
-          width: 33%;
-          color: #888;
-        }
-      '';
+      python = pkgs.python3.withPackages (ps: [ ps.fonttools ]);
+      libertinus = "${pkgs.libertinus}/share/fonts/opentype";
 
       makeEpubPackage =
         dir:
         pkgs.runCommand "${dir}.epub" { } ''
-          root="${copticscriptorium.outPath}/${dir}"
-
-          dir_out=$(mktemp -d)
-
-          ${pkgs.findutils}/bin/find "$root" -name '*.xml' | sort | while read -r xml_file; do
-            ${pkgs.saxon-he}/bin/saxon-he -s:"$xml_file" -xsl:${./html.xslt} -o:"$dir_out/$(basename $xml_file .xml).html"
-          done
-
-          ${pkgs.pandoc}/bin/pandoc $dir_out/*.html \
-            -t epub2 -o $out \
-            --css ${pkgs.writeText "style.css" css} \
-            --epub-embed-font=${ifao-grec}/IFAOGrec.ttf \
-            --epub-embed-font=${pkgs.eb-garamond}/share/fonts/opentype/EBGaramond08-Regular.otf \
-            -V title="Coptic Scriptorium - ${dir}"
+          ${python}/bin/python3 ${./epub}/build.py "${copticscriptorium}/${dir}" $out \
+            --coptic-font ${pkgs.noto-fonts}/share/fonts/noto/NotoSansCoptic-Regular.otf \
+            --serif-font ${libertinus}/LibertinusSerif-Regular.otf \
+            --serif-italic-font ${libertinus}/LibertinusSerif-Italic.otf \
+            --serif-bold-font ${libertinus}/LibertinusSerif-Bold.otf \
+            --fallback-font ${pkgs.dejavu_fonts.minimal}/share/fonts/truetype/DejaVuSans.ttf \
+            --typst ${pkgs.typst}/bin/typst
         '';
 
 
@@ -103,11 +64,22 @@
         builtins.attrNames (builtins.readDir copticscriptorium.outPath)
       );
 
+      # Corpora with a TreeTagger export (a `*_TT` directory or `*_TT.zip`), the EPUB source
+      ttCorpora = builtins.filter (
+        name:
+        let
+          entries = builtins.readDir "${copticscriptorium}/${name}";
+        in
+        builtins.any (e: pkgs.lib.hasSuffix "_TT" e || pkgs.lib.hasSuffix "_TT.zip" e) (
+          builtins.attrNames entries
+        )
+      ) (builtins.attrNames (pkgs.lib.filterAttrs (_: type: type == "directory") (builtins.readDir copticscriptorium)));
+
       epubPackages = builtins.listToAttrs (
         map (dir: {
           name = dir + "-epub";
           value = makeEpubPackage dir;
-        }) subdirs
+        }) ttCorpora
       );
       pdfPackages = builtins.listToAttrs (
         map (dir: {
